@@ -1,0 +1,17 @@
+# Secrets
+.env
+*.env
+
+# Python junk
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Notebook autosave folders
+.ipynb_checkpoints/
+
+# Agent checkpoint databases
+*.db
+
+# Filings (not yours to redistribute)
+*.pdf
