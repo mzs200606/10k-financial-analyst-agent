@@ -33,7 +33,8 @@ def validate_figures(figures, meta):
     if r_c and r_p and not (0.2 <= r_c / r_p <= 5):
         issues.append(f"WARNING: revenue changed by a factor of {r_c / r_p:.2f}x year over year. Possible wrong column.")
 
-    for k in ["inventory", "receivables", "short_term_debt", "long_term_debt", "current_liabilities", "interest_expense"]:
+    for k in ["inventory", "receivables", "short_term_borrowings", "current_portion_long_term_debt", "long_term_debt",
+              "current_liabilities", "interest_expense", "interest_on_debt", "interest_on_finance_leases"]:
         if cur.get(k) is not None and cur[k] < 0:
             issues.append(f"WARNING: current-year '{k}' is negative.")
     return issues

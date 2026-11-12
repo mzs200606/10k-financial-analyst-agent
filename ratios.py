@@ -3,14 +3,30 @@
 # Figures we ask the LLM to extract. Everything is "as reported" in the filing's own units (ratios don't depend on units).
 REQUIRED = ["revenue", "net_income", "total_assets", "equity",
             "current_assets", "current_liabilities", "operating_cash_flow"]
-OPTIONAL = ["ebit", "interest_expense", "inventory", "receivables",
-            "short_term_debt", "long_term_debt", "total_liabilities_and_equity"]
+OPTIONAL = ["ebit", "interest_expense", "interest_on_debt", "interest_on_finance_leases",
+            "inventory", "receivables", "short_term_borrowings", "current_portion_long_term_debt",
+            "long_term_debt", "total_liabilities_and_equity"]
 FIELDS = REQUIRED + OPTIONAL
 
 
+def _sum_or_none(*values):
+    """Sum the values that exist. If none exist, return None (so 'missing' stays 'missing', not 0)."""
+    present = [v for v in values if v is not None]
+    return sum(present) if present else None
+
+
 def with_derived(f):
-    """Copy a period's figures and add derived values. total_debt is summed HERE, not by the LLM."""
+    """Copy a period's figures and add derived values. All additions happen HERE, never in the LLM.
+
+    - interest_expense: the single total line if the filing has one, else interest on debt + on finance leases.
+    - short_term_debt: short-term borrowings + current portion of long-term debt (unless given directly).
+    - total_debt: short_term_debt + long_term_debt.
+    """
     f = dict(f)
+    if f.get("interest_expense") is None:
+        f["interest_expense"] = _sum_or_none(f.get("interest_on_debt"), f.get("interest_on_finance_leases"))
+    if f.get("short_term_debt") is None:
+        f["short_term_debt"] = _sum_or_none(f.get("short_term_borrowings"), f.get("current_portion_long_term_debt"))
     f["total_debt"] = (f.get("short_term_debt") or 0) + (f.get("long_term_debt") or 0)
     if f.get("inventory") is None:
         f["inventory"] = 0

@@ -45,3 +45,45 @@ def test_missing_input_returns_none():
 
 def test_compute_all_ratios_returns_all_eight():
     assert len(compute_all_ratios(FIGS)) == 8
+
+
+# --- derived interest expense and short-term debt (step 4) ---
+
+def test_interest_expense_summed_from_components_when_no_total_line():
+    f = {**FIGS, "interest_expense": None, "interest_on_debt": 2000, "interest_on_finance_leases": 250}
+    assert with_derived(f)["interest_expense"] == 2250
+
+
+def test_direct_interest_expense_wins_over_components():
+    f = {**FIGS, "interest_expense": 30, "interest_on_debt": 2000, "interest_on_finance_leases": 250}
+    assert with_derived(f)["interest_expense"] == 30
+
+
+def test_one_interest_component_is_enough():
+    f = {**FIGS, "interest_expense": None, "interest_on_debt": 2000}
+    assert with_derived(f)["interest_expense"] == 2000
+
+
+def test_no_interest_data_stays_missing_not_zero():
+    f = {**FIGS, "interest_expense": None}
+    assert with_derived(f)["interest_expense"] is None
+    assert compute_ratio("interest_coverage", with_derived(f))["note"] == "missing input"
+
+
+def test_interest_coverage_works_from_components():
+    f = {**FIGS, "interest_expense": None, "interest_on_debt": 20, "interest_on_finance_leases": 10}
+    assert compute_ratio("interest_coverage", with_derived(f))["value"] == 5.0
+
+
+def test_short_term_debt_summed_from_components():
+    f = {k: v for k, v in FIGS.items() if k != "short_term_debt"}
+    f.update(short_term_borrowings=3000, current_portion_long_term_debt=2500, long_term_debt=30000)
+    d = with_derived(f)
+    assert d["short_term_debt"] == 5500
+    assert d["total_debt"] == 35500
+
+
+def test_only_one_short_term_component_still_counts():
+    f = {k: v for k, v in FIGS.items() if k != "short_term_debt"}
+    f.update(short_term_borrowings=None, current_portion_long_term_debt=2500, long_term_debt=100)
+    assert with_derived(f)["total_debt"] == 2600

@@ -53,3 +53,8 @@ def test_revenue_jump_over_5x_warns():
 def test_negative_debt_warns():
     issues = run(cur={"long_term_debt": -5})
     assert any("long_term_debt" in i and "negative" in i for i in issues)
+
+
+def test_negative_interest_component_warns():
+    issues = run(cur={"interest_on_debt": -5})
+    assert any("interest_on_debt" in i and "negative" in i for i in issues)
