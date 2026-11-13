@@ -15,3 +15,7 @@ __pycache__/
 
 # Filings (not yours to redistribute)
 *.pdf
+
+# Virtual environments
+.venv/
+venv/
