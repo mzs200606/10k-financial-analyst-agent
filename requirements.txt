@@ -3,3 +3,4 @@ langgraph-checkpoint-sqlite
 google-genai
 python-dotenv
 httpx
+streamlit

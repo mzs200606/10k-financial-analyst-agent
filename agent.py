@@ -9,6 +9,7 @@ import sqlite3
 import time
 from typing import TypedDict
 
+from google import genai
 from google.genai import types
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, StateGraph
@@ -22,6 +23,11 @@ DEFAULT_MODEL = "gemini-3.6-flash"
 
 
 # ---------------------------------------------------------------- Gemini helpers
+def make_client(api_key):
+    """Create a Gemini client from an API key."""
+    return genai.Client(api_key=api_key)
+
+
 def with_retry(fn, tries=5, wait=4):
     """Gemini occasionally returns 429/503. Retry with growing waits (4s, 8s, 16s, 32s) before giving up."""
     for attempt in range(tries):
